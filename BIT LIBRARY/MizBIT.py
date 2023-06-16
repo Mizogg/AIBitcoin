@@ -69,7 +69,7 @@ def generate_keys(start, end, order, choice_start, end_hex, num_cpus):
                     process_address(address_uncompressed, private_key, choice_start)
                 keys_generated += 1
                 total_keys_scanned += 1*num_cpus
-                if keys_generated % 1000 == 0:
+                if keys_generated % 1000 == 0 and multiprocessing.current_process()._identity[0] == 1:
                     save_progress('progress.txt', hex(private_key), end_hex)
                 if time.time() - start_time >= 1:
                     keys_per_second = keys_generated / (time.time() - start_time)
@@ -116,6 +116,8 @@ def generate_keys(start, end, order, choice_start, end_hex, num_cpus):
             scan_order = 'Unknown'
     except KeyboardInterrupt:
         console.print("[bold red]Program interrupted. Cleaning up...[/bold red]")
+        if order == '1' and multiprocessing.current_process()._identity[0] == 1 and order == '1':
+            save_progress('progress.txt', hex(private_key), end_hex)
         return False
     return True
 
