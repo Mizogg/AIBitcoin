@@ -1,6 +1,9 @@
 # AIBitcoin
 
-![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/744e5eae-d0be-4264-bf7b-ac95083414ed)
+
+
+![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/99f4917d-26c6-4796-a863-ec69e00081d2)
+
 
 Just another Bitcoin Script from Mizogg but with a little help from ChatGPT AI systems. Here is what AI thought of the finished product.
 
@@ -39,6 +42,7 @@ To run the script, you would need to have the required dependencies installed (b
 Please note that using this script for Bitcoin key generation or scanning addresses without proper authorization or legal rights may be against the terms of service of Bitcoin services and could potentially violate applicable laws and regulations. It's important to use such tools responsibly and for legitimate purposes.
 
 
-![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/8493dd41-260e-457a-95b1-61cb7f03d2cf)
+![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/22843c0e-6119-460f-9b5f-b08898a68e94)
+
 
 Puzzle66 = 20000000000000000 3ffffffffffffffff 
