@@ -29,10 +29,11 @@ def check_balance(address):
 
 
 def process_address(address, private_key, choice_start):
-    if address in addfind:
-        console.print(f'[purple]\nFOUND!! Private Key: {private_key}\tAddress: {address}\n[/purple]')
-        with open('found.txt', 'a') as result:
-            result.write(f'Private Key: {private_key}\tAddress: {address}\n')
+    if choice_start == '1':
+        if address in addfind:
+            console.print(f'[purple]\nFOUND!! Private Key: {hex(private_key)}\tAddress: {address}\n[/purple]')
+            with open('found.txt', 'a') as result:
+                result.write(f'Private Key: {hex(private_key)}\tAddress: {address}\n')
     elif choice_start == '2':
         resload = check_balance(address)
         if resload:
@@ -40,117 +41,119 @@ def process_address(address, private_key, choice_start):
             txs = resload['txs']
             addressinfo = resload['address']
             if txs > 0:
-                console.print(f'[purple]\nFOUND!! Private Key: {private_key}\tAddress: {addressinfo}\tBalance : {balance}\tTransactions : {txs}\n[/purple]')
+                console.print(f'[purple]\nFOUND!! Private Key: {hex(private_key)}\tAddress: {addressinfo}\tBalance : {balance}\tTransactions : {txs}\n[/purple]')
                 with open('found.txt', 'a') as result:
-                    result.write(f'Private Key: {private_key}\tAddress: {addressinfo}\tBalance : {balance}\tTransactions : {txs}\n')
+                    result.write(f'Private Key: {hex(private_key)}\tAddress: {addressinfo}\tBalance : {balance}\tTransactions : {txs}\n')
 
-def generate_keys(start, end, order, choice_start, end_hex, num_cpus):
+def generate_keys(cpu_start, cpu_end, order, choice_start, end_hex, num_cpus):
     keys_generated = 0
     total_keys_scanned = 0
     start_time = time.time()
+    group_size = 1000000
     try:
         if num_cpus == 1:
             with Progress() as progress:
-                task = progress.add_task("[cyan]Scanning...", total=(end - start))
+                task = progress.add_task("[cyan]Scanning...", total=(cpu_end - cpu_start))
                 if order == '1':
-                    for i in range(start, end):
-                        private_key = i
-                        address_compressed = ice.privatekey_to_address(0, True, private_key)
-                        address_uncompressed = ice.privatekey_to_address(0, False, private_key)
-                        if choice_start == '1':
-                            process_address(address_compressed, private_key, choice_start)
-                            process_address(address_uncompressed, private_key, choice_start)
-                        elif choice_start == '2':
-                            process_address(address_compressed, private_key, choice_start)
-                            process_address(address_uncompressed, private_key, choice_start)
-                        keys_generated += 1
-                        total_keys_scanned += 1*num_cpus
-                        if keys_generated % 1000 == 0:
-                            save_progress('progress.txt', hex(private_key), end_hex)
-                        if time.time() - start_time >= 1:
-                            keys_per_second = keys_generated / (time.time() - start_time)
-                            total_CPU_key = keys_per_second * num_cpus
-                            description = f"[bold green]Keys/Sec: [/bold green]{round(keys_per_second)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
-                            progress.update(task, completed=private_key - start, description=description)
-                            keys_generated = 0
-                            start_time = time.time()
-                           
+                    private_key = cpu_start
+                    P = ice.scalar_multiplication(private_key)
+                    current_pvk = private_key + 1
+                    for i in range(cpu_start, cpu_end, group_size):
+                        Pv = ice.point_sequential_increment(group_size, P)
+                        for t in range(group_size):
+                            this_btc = ice.pubkey_to_address(0, True, Pv[t*65:t*65+65])
+                            process_address(this_btc, current_pvk+t, choice_start)
+                            keys_generated += 1
+                            total_keys_scanned += keys_generated*num_cpus
+                            if keys_generated % group_size == 0:
+                                save_progress('progress.txt',  current_pvk+t, end_hex)
+                            if time.time() - start_time >= 1:
+                                keys_per_second = keys_generated / (time.time() - start_time)
+                                total_CPU_key = keys_per_second * num_cpus
+                                description = f"[bold green]Keys/Sec: [/bold green]{round(keys_per_second)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
+                                progress.update(task, completed=current_pvk+t - cpu_start, description=description)
+                                keys_generated = 0
+                                start_time = time.time()
+                        P = Pv[-65:]
+                        current_pvk += group_size
+
                 elif order == '2':
                     while True:
-                        private_key = random.randrange(start, end)
-                        address_compressed = ice.privatekey_to_address(0, True, private_key)
-                        address_uncompressed = ice.privatekey_to_address(0, False, private_key)
-                        if choice_start == '1':
-                            process_address(address_compressed, private_key, choice_start)
-                            process_address(address_uncompressed, private_key, choice_start)
-                        elif choice_start == '2':
-                            process_address(address_compressed, private_key, choice_start)
-                            process_address(address_uncompressed, private_key, choice_start)
-                        keys_generated += 1
-                        total_keys_scanned += 1*num_cpus
-                        if time.time() - start_time >= 1:
-                            keys_per_second = keys_generated / (time.time() - start_time)
-                            total_CPU_key = keys_per_second * num_cpus
-                            description = f"[bold green]Keys/Sec: [/bold green]{round(keys_per_second)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
-                            progress.update(task, completed=private_key - start, description=description)
-                            keys_generated = 0
-                            start_time = time.time()
+                        private_key = random.randrange(cpu_start, cpu_end, group_size)
+                        P = ice.scalar_multiplication(private_key)
+                        current_pvk = private_key + 1
+                        Pv = ice.point_sequential_increment(group_size, P)
+                        for t in range(group_size):
+                            this_btc = ice.pubkey_to_address(0, True, Pv[t*65:t*65+65])
+                            process_address(this_btc, current_pvk+t, choice_start)
+                            keys_generated += 1
+                            total_keys_scanned += keys_generated*num_cpus
+                            if time.time() - start_time >= 1:
+                                keys_per_second = keys_generated / (time.time() - start_time)
+                                total_CPU_key = keys_per_second * num_cpus
+                                description = f"[bold green]Keys/Sec: [/bold green]{round(keys_per_second)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
+                                progress.update(task, completed=current_pvk+t - cpu_start, description=description)
+                                keys_generated = 0
+                                start_time = time.time()
+                        P = Pv[-65:]
+                        current_pvk += group_size
 
         else:
             console.print("[cyan]Scanning...")
             if order == '1':
-                for i in range(start, end):
-                    private_key = i
-                    address_compressed = ice.privatekey_to_address(0, True, private_key)
-                    address_uncompressed = ice.privatekey_to_address(0, False, private_key)
-                    if choice_start == '1':
-                        process_address(address_compressed, private_key, choice_start)
-                        process_address(address_uncompressed, private_key, choice_start)
-                    elif choice_start == '2':
-                        process_address(address_compressed, private_key, choice_start)
-                        process_address(address_uncompressed, private_key, choice_start)
-                    keys_generated += 1
-                    total_keys_scanned += 1*num_cpus
-                    if keys_generated % 1000 == 0 and multiprocessing.current_process()._identity[0] == 1:
-                        save_progress('progress.txt', hex(private_key), end_hex)
-                    if time.time() - start_time >= 1 and multiprocessing.current_process()._identity[0] == 1:
-                        keys_per_second = keys_generated / (time.time() - start_time)
-                        total_CPU_key = keys_per_second * num_cpus
-                        description = f"[bold green]Keys/Sec per CPU: [/bold green]{round(keys_per_second)}[bold green] Total Keys/Sec from[/bold green] {num_cpus} [bold green]CPU = [/bold green]{round(total_CPU_key)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
-                        console.print(description, end='\r')
-                        keys_generated = 0
-                        start_time = time.time()
-                           
+                private_key = cpu_start
+                P = ice.scalar_multiplication(private_key)
+                current_pvk = private_key + 1
+                for i in range(cpu_start, cpu_end, group_size):
+                    Pv = ice.point_sequential_increment(group_size, P)
+                    for t in range(group_size):
+                        this_btc = ice.pubkey_to_address(0, True, Pv[t*65:t*65+65])
+                        process_address(this_btc, current_pvk+t, choice_start)
+                        keys_generated += 1
+                        total_keys_scanned += keys_generated*num_cpus
+                        if keys_generated % group_size == 0 and multiprocessing.current_process()._identity[0] == 1:
+                            save_progress('progress.txt', current_pvk+t, end_hex)
+                        if time.time() - start_time >= 1 and multiprocessing.current_process()._identity[0] == 1:
+                            keys_per_second = keys_generated / (time.time() - start_time)
+                            total_CPU_key = keys_per_second * num_cpus
+                            description = f"[bold green]Keys/Sec per CPU: [/bold green]{round(keys_per_second)} [bold green]Total Keys/Sec from[/bold green] {num_cpus} [bold green]CPU = [/bold green]{round(total_CPU_key)} [bold green]Total Keys: [/bold green]{total_keys_scanned}"
+                            console.print(description, end='\r')
+                            keys_generated = 0
+                            start_time = time.time()
+                    P = Pv[-65:]
+                    current_pvk += group_size
+
             elif order == '2':
                 while True:
-                    private_key = random.randrange(start, end)
-                    address_compressed = ice.privatekey_to_address(0, True, private_key)
-                    address_uncompressed = ice.privatekey_to_address(0, False, private_key)
-                    if choice_start == '1':
-                        process_address(address_compressed, private_key, choice_start)
-                        process_address(address_uncompressed, private_key, choice_start)
-                    elif choice_start == '2':
-                        process_address(address_compressed, private_key, choice_start)
-                        process_address(address_uncompressed, private_key, choice_start)
-                    keys_generated += 1
-                    total_keys_scanned += 1*num_cpus
-                    if time.time() - start_time >= 1 and multiprocessing.current_process()._identity[0] == 1:
-                        keys_per_second = keys_generated / (time.time() - start_time)
-                        total_CPU_key = keys_per_second * num_cpus
-                        description = f"[bold green]Keys/Sec per CPU: [/bold green]{round(keys_per_second)}[bold green] Total Keys/Sec from[/bold green] {num_cpus} [bold green]CPU = [/bold green]{round(total_CPU_key)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
-                        console.print(description, end='\r')
-                        keys_generated = 0
-                        start_time = time.time()
+                    private_key = random.randrange(cpu_start, cpu_end)
+                    P = ice.scalar_multiplication(private_key)
+                    current_pvk = private_key + 1
+                    for i in range(cpu_start, cpu_end, group_size):
+                        Pv = ice.point_sequential_increment(group_size, P)
+                        for t in range(group_size):
+                            this_btc = ice.pubkey_to_address(0, True, Pv[t*65:t*65+65])
+                            process_address(this_btc, current_pvk+t, choice_start)
+                            keys_generated += 1
+                            total_keys_scanned += keys_generated*num_cpus
+                            if time.time() - start_time >= 1 and multiprocessing.current_process()._identity[0] == 1:
+                                keys_per_second = keys_generated / (time.time() - start_time)
+                                total_CPU_key = keys_per_second * num_cpus
+                                description = f"[bold green]Keys/Sec per CPU: [/bold green]{round(keys_per_second)} [bold green]Total Keys/Sec from[/bold green] {num_cpus} [bold green]CPU = [/bold green]{round(total_CPU_key)} [bold green]Total Keys: [/bold green]{total_keys_scanned}"
+                                console.print(description, end='\r')
+                                keys_generated = 0
+                                start_time = time.time()
+                        P = Pv[-65:]
+                        current_pvk += group_size
     except KeyboardInterrupt:
         console.print("[bold red]Program interrupted. Cleaning up...[/bold red]")
         if order == '1' and multiprocessing.current_process()._identity[0] == 1 and order == '1':
-            save_progress('progress.txt', hex(private_key), end_hex)
+            save_progress('progress.txt', current_pvk+t, end_hex)
         return False
     return True
 
 def save_progress(filename, start_hex, end_hex):
     with open(filename, 'w') as file:
-        file.write(f'{start_hex}\n{end_hex}')
+        file.write(f'{hex(start_hex)}\n{end_hex}')
 
 def load_progress(filename):
     try:
