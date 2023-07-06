@@ -6,6 +6,7 @@ GUI PyQT5 Version Coming SOON! But CMD Version already here down below the discr
 This is a Bitcoin key generation and scanning application built using PyQt5 and secp256k1 libraries.
 
 Features
+---------
 Utilizes multiprocessing for faster key generation and scanning
 Supports sequential and random order scanning
 Displays the current key being checked in hexadecimal format
@@ -25,19 +26,26 @@ Description: An example of a found private key and its corresponding Bitcoin add
 
 Installation
 Clone the repository:
+---------
 
+```
 git clone https://github.com/Mizogg/AIBitcoin.git
-
+```
 Install the required dependencies:
+---------
 
+```
 pip install PyQt5 bloomfilter
-
+```
+---------
 Usage
 Choose the scanning order (sequential or random) and the number of CPUs to utilize.
 Specify the start and end hexadecimal values for the puzzle 66.
 Click the "Start" button to begin the scanning process.
 As the application scans keys, it will display the current key being checked, the corresponding Bitcoin address, and the total keys scanned.
 If a private key matches one of the Bitcoin addresses in the puzzle.txt file, it will be saved in the found.txt file.
+
+---------
 Contributing
 Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
 
@@ -87,5 +95,6 @@ Please note that using this script for Bitcoin key generation or scanning addres
 
 ![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/22843c0e-6119-460f-9b5f-b08898a68e94)
 
-
+```
 Puzzle66 = 20000000000000000 3ffffffffffffffff 
+```
