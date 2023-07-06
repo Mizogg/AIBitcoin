@@ -1,9 +1,47 @@
 # AIBitcoin
 
+AIBitcoin
+Coming SOON! But CMD Version already here down below the discription.
 
+This is a Bitcoin key generation and scanning application built using PyQt5 and secp256k1 libraries.
 
-![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/99f4917d-26c6-4796-a863-ec69e00081d2)
+Features
+Utilizes multiprocessing for faster key generation and scanning
+Supports sequential and random order scanning
+Displays the current key being checked in hexadecimal format
+Shows the corresponding Bitcoin address for the checked key
+Detects and saves found private keys and their associated addresses
+Provides information on the total keys scanned and keys per second
 
+![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/cdb08042-d616-40d1-adbb-aceda0c5fd15)
+
+Screenshot 1
+Description: The application's main interface, allowing users to start and stop the scanning process.
+
+![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/3100e111-f76a-4aa8-a514-c08b4d2f2e62)
+
+Screenshot 2
+Description: An example of a found private key and its corresponding Bitcoin address.
+
+Installation
+Clone the repository:
+
+git clone https://github.com/Mizogg/AIBitcoin.git
+
+Install the required dependencies:
+
+pip install PyQt5 bloomfilter
+
+Usage
+Choose the scanning order (sequential or random) and the number of CPUs to utilize.
+Specify the start and end hexadecimal values for the puzzle 66.
+Click the "Start" button to begin the scanning process.
+As the application scans keys, it will display the current key being checked, the corresponding Bitcoin address, and the total keys scanned.
+If a private key matches one of the Bitcoin addresses in the puzzle.txt file, it will be saved in the found.txt file.
+Contributing
+Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
+
+![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/b520d696-494f-4cad-b7dd-488bc14a13ae)
 
 Just another Bitcoin Script from Mizogg but with a little help from ChatGPT AI systems. Here is what AI thought of the finished product.
 
@@ -39,7 +77,12 @@ The script handles interruptions, such as keyboard interrupts, and provides an o
 
 To run the script, you would need to have the required dependencies installed (bit, requests) and provide a valid puzzle.txt file with the Bitcoin addresses to search for. You can customize the script's behavior by providing input when prompted, such as choosing between offline and online mode, scanning order, and resuming previous scans.
 
-Please note that using this script for Bitcoin key generation or scanning addresses without proper authorization or legal rights may be against the terms of service of Bitcoin services and could potentially violate applicable laws and regulations. It's important to use such tools responsibly and for legitimate purposes.
+License
+This project is licensed under the MIT License.
+
+Disclaimer
+Please note that using this script for Bitcoin key generation or scanning addresses without proper authorization or legal rights may be against the terms of service of Bitcoin services and could potentially violate applicable laws and regulations. Use this tool responsibly and for legitimate purposes.
+
 
 
 ![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/22843c0e-6119-460f-9b5f-b08898a68e94)
