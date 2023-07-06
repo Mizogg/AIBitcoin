@@ -45,6 +45,8 @@ Click the "Start" button to begin the scanning process.
 As the application scans keys, it will display the current key being checked, the corresponding Bitcoin address, and the total keys scanned.
 If a private key matches one of the Bitcoin addresses in the puzzle.txt file, it will be saved in the found.txt file.
 
+https://github.com/Mizogg/AIBitcoin/assets/88630056/52b521c8-d7ad-49d7-8360-ee7901c6a559
+
 ---------
 ## Contributing
 Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
