@@ -1,7 +1,7 @@
 # AIBitcoin
 
 AIBitcoin
-Coming SOON! But CMD Version already here down below the discription.
+GUI PyQT5 Version Coming SOON! But CMD Version already here down below the discription.
 
 This is a Bitcoin key generation and scanning application built using PyQt5 and secp256k1 libraries.
 
