@@ -38,7 +38,7 @@ Install the required dependencies:
 pip install PyQt5 bloomfilter
 ```
 ---------
-Usage
+## Usage
 Choose the scanning order (sequential or random) and the number of CPUs to utilize.
 Specify the start and end hexadecimal values for the puzzle 66.
 Click the "Start" button to begin the scanning process.
@@ -46,10 +46,12 @@ As the application scans keys, it will display the current key being checked, th
 If a private key matches one of the Bitcoin addresses in the puzzle.txt file, it will be saved in the found.txt file.
 
 ---------
-Contributing
+## Contributing
 Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
 
 ![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/b520d696-494f-4cad-b7dd-488bc14a13ae)
+
+## AIBitcoin
 
 Just another Bitcoin Script from Mizogg but with a little help from ChatGPT AI systems. Here is what AI thought of the finished product.
 
@@ -85,10 +87,16 @@ The script handles interruptions, such as keyboard interrupts, and provides an o
 
 To run the script, you would need to have the required dependencies installed (bit, requests) and provide a valid puzzle.txt file with the Bitcoin addresses to search for. You can customize the script's behavior by providing input when prompted, such as choosing between offline and online mode, scanning order, and resuming previous scans.
 
-License
-This project is licensed under the MIT License.
+## Fork the repository.
+Create a new branch for your feature or bug fix.
+Make your changes and commit them.
+Push your changes to your forked repository.
+Open a pull request, describing your changes in detail.
 
-Disclaimer
+## License
+This project is licensed under the MIT License. See the LICENSE file for more information.
+
+## Disclaimer
 Please note that using this script for Bitcoin key generation or scanning addresses without proper authorization or legal rights may be against the terms of service of Bitcoin services and could potentially violate applicable laws and regulations. Use this tool responsibly and for legitimate purposes.
 
 
