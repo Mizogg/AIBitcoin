@@ -20,6 +20,7 @@ Screenshot 1
 Description: The application's main interface, allowing users to start and stop the scanning process.
 
 ![image](https://github.com/Mizogg/AIBitcoin/assets/88630056/1ff45e36-ce07-4c4f-8e3e-8d0aa4a16d46)
+
 Screenshot 2
 Description: An example of 23 found private key in range 1 -deadead in under 3mins and its corresponding Bitcoin address.
 
