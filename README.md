@@ -24,20 +24,25 @@ Description: The application's main interface, allowing users to start and stop 
 Screenshot 2
 Description: An example of 23 found private key in range 1 -deadead in under 3mins and its corresponding Bitcoin address.
 
-Installation
-Clone the repository:
----------
+
+## Installation
+
+1. Clone the repository:
+
+   ```
+   $ git clone https://github.com/Mizogg/AIBitcoin.git
+   $ cd AIBitcoin
+2. Install the required dependencies:
+
+  ```
+$ pip install -r requirements.txt
+```
+3. Run the application:
 
 ```
-git clone https://github.com/Mizogg/AIBitcoin.git
+$ python MizICE.py
 ```
-Install the required dependencies:
----------
 
-```
-pip install PyQt5 bloomfilter
-```
----------
 ## Usage
 Choose the scanning order (sequential or random) and the number of CPUs to utilize.
 Specify the start and end hexadecimal values for the puzzle 66.
