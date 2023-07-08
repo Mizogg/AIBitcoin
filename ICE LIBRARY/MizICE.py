@@ -7,14 +7,80 @@ import json
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.progress import Progress
-
+from bloomfilter import BloomFilter
 console = Console()
 session = requests.Session()
 session.headers.update({'User-Agent': 'Mozilla/5.0'})
 
-filename = 'puzzle.txt'
-with open(filename) as file:
-    addfind = file.read().split()
+import os, sys, platform
+is_windows = True if platform.system() == "Windows" else False
+
+if is_windows:
+    os.system("title Mizogg @ github.com/Mizogg")
+
+def red(text):
+    os.system(""); faded = ""
+    for line in text.splitlines():
+        green = 250
+        for character in line:
+            green -= 5
+            if green < 0:
+                green = 0
+            faded += (f"\033[38;2;255;{green};0m{character}\033[0m")
+        faded += "\n"
+    return faded
+
+def blue(text):
+    os.system(""); faded = ""
+    for line in text.splitlines():
+        green = 0
+        for character in line:
+            green += 3
+            if green > 255:
+                green = 255
+            faded += (f"\033[38;2;0;{green};255m{character}\033[0m")
+        faded += "\n"
+    return faded
+
+def water(text):
+    os.system(""); faded = ""
+    green = 10
+    for line in text.splitlines():
+        faded += (f"\033[38;2;0;{green};255m{line}\033[0m\n")
+        if not green == 255:
+            green += 15
+            if green > 255:
+                green = 255
+    return faded
+
+def purple(text):
+    os.system("")
+    faded = ""
+    down = False
+
+    for line in text.splitlines():
+        red = 40
+        for character in line:
+            if down:
+                red -= 3
+            else:
+                red += 3
+            if red > 254:
+                red = 255
+                down = True
+            elif red < 1:
+                red = 30
+                down = False
+            faded += (f"\033[38;2;{red};0;220m{character}\033[0m")
+    return faded
+    
+try:
+    with open('btc.bf', "rb") as fp:
+        addfind = BloomFilter.load(fp)
+except FileNotFoundError:
+    filename = 'btc.txt'
+    with open(filename) as file:
+        addfind = file.read().split()
 
 def check_balance(address):
     try:
@@ -23,15 +89,26 @@ def check_balance(address):
             res = response.json()
             return res
         else:
-            console.print('[red]Empty response from API[/red]')
+            print(red('Empty response from API'), end="")
     except json.JSONDecodeError:
-        print('Error decoding JSON response from API')
+        print(red('Error decoding JSON response from API'), end="")
 
-
+def convert_int(num: int): 
+    dict_suffix = {0: 'key', 1: 'Kkey/s', 2: 'Mkey/s', 3: 'Gkey/s', 4: 'Tkey/s', 5: 'Pkey/s', 6: 'Ekeys/s'} 
+    num *= 1.0 
+    idx = 0 
+    for ii in range(len(dict_suffix) - 1): 
+        if int(num / 1000) > 0: 
+            idx += 1 
+            num /= 1000 
+        else: 
+            break 
+    return f"{num:.2f}", dict_suffix[idx]
+    
 def process_address(address, private_key, choice_start):
     if choice_start == '1':
         if address in addfind:
-            console.print(f'[purple]\nFOUND!! Private Key: {hex(private_key)}\tAddress: {address}\n[/purple]')
+            print(purple(f'\nFOUND!! Private Key: {hex(private_key)}\tAddress: {address}\n') + "\033[38;2;148;0;230m")
             with open('found.txt', 'a') as result:
                 result.write(f'Private Key: {hex(private_key)}\tAddress: {address}\n')
     elif choice_start == '2':
@@ -41,13 +118,14 @@ def process_address(address, private_key, choice_start):
             txs = resload['txs']
             addressinfo = resload['address']
             if txs > 0:
-                console.print(f'[purple]\nFOUND!! Private Key: {hex(private_key)}\tAddress: {addressinfo}\tBalance : {balance}\tTransactions : {txs}\n[/purple]')
+                print(purple(f'\nFOUND!! Private Key: {hex(private_key)}\tAddress: {addressinfo}\tBalance : {balance}\tTransactions : {txs}\n') + "\033[38;2;148;0;230m")
                 with open('found.txt', 'a') as result:
                     result.write(f'Private Key: {hex(private_key)}\tAddress: {addressinfo}\tBalance : {balance}\tTransactions : {txs}\n')
 
 def generate_keys(cpu_start, cpu_end, order, choice_start, end_hex, num_cpus):
     keys_generated = 0
     total_keys_scanned = 0
+    total_keys_scanned1 = 0
     start_time = time.time()
     group_size = 1000000
     try:
@@ -64,13 +142,14 @@ def generate_keys(cpu_start, cpu_end, order, choice_start, end_hex, num_cpus):
                             this_btc = ice.pubkey_to_address(0, True, Pv[t*65:t*65+65])
                             process_address(this_btc, current_pvk+t, choice_start)
                             keys_generated += 1
-                            total_keys_scanned += keys_generated*num_cpus
+                            total_keys_scanned += 1
                             if keys_generated % group_size == 0:
                                 save_progress('progress.txt',  current_pvk+t, end_hex)
                             if time.time() - start_time >= 1:
-                                keys_per_second = keys_generated / (time.time() - start_time)
-                                total_CPU_key = keys_per_second * num_cpus
-                                description = f"[bold green]Keys/Sec: [/bold green]{round(keys_per_second)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
+                                elapsed_time = time.time() - start_time
+                                speed = keys_generated / elapsed_time if elapsed_time > 0 else 0
+                                formatted_speed = convert_int(speed)
+                                description = print(red(f" {formatted_speed}  Total Keys: {total_keys_scanned}"), end="")
                                 progress.update(task, completed=current_pvk+t - cpu_start, description=description)
                                 keys_generated = 0
                                 start_time = time.time()
@@ -87,11 +166,12 @@ def generate_keys(cpu_start, cpu_end, order, choice_start, end_hex, num_cpus):
                             this_btc = ice.pubkey_to_address(0, True, Pv[t*65:t*65+65])
                             process_address(this_btc, current_pvk+t, choice_start)
                             keys_generated += 1
-                            total_keys_scanned += keys_generated*num_cpus
+                            total_keys_scanned += 1
                             if time.time() - start_time >= 1:
-                                keys_per_second = keys_generated / (time.time() - start_time)
-                                total_CPU_key = keys_per_second * num_cpus
-                                description = f"[bold green]Keys/Sec: [/bold green]{round(keys_per_second)}[bold green] Total Keys: [/bold green]{total_keys_scanned}"
+                                elapsed_time = time.time() - start_time
+                                speed = keys_generated / elapsed_time if elapsed_time > 0 else 0
+                                formatted_speed = convert_int(speed)
+                                description = print(red(f"{formatted_speed}  Total Keys: {total_keys_scanned}"), end="")
                                 progress.update(task, completed=current_pvk+t - cpu_start, description=description)
                                 keys_generated = 0
                                 start_time = time.time()
@@ -99,7 +179,7 @@ def generate_keys(cpu_start, cpu_end, order, choice_start, end_hex, num_cpus):
                         current_pvk += group_size
 
         else:
-            console.print("[cyan]Scanning...")
+            print(water("Scanning..."), end="")
             if order == '1':
                 private_key = cpu_start
                 P = ice.scalar_multiplication(private_key)
@@ -111,14 +191,19 @@ def generate_keys(cpu_start, cpu_end, order, choice_start, end_hex, num_cpus):
                         process_address(this_btc, current_pvk+t, choice_start)
                         keys_generated += 1
                         total_keys_scanned += keys_generated*num_cpus
+                        total_keys_scanned1 += keys_generated*num_cpus
                         if keys_generated % group_size == 0 and multiprocessing.current_process()._identity[0] == 1:
                             save_progress('progress.txt', current_pvk+t, end_hex)
                         if time.time() - start_time >= 1 and multiprocessing.current_process()._identity[0] == 1:
-                            keys_per_second = keys_generated / (time.time() - start_time)
-                            total_CPU_key = keys_per_second * num_cpus
-                            description = f"[bold green]Keys/Sec per CPU: [/bold green]{round(keys_per_second)} [bold green]Total Keys/Sec from[/bold green] {num_cpus} [bold green]CPU = [/bold green]{round(total_CPU_key)} [bold green]Total Keys: [/bold green]{total_keys_scanned}"
-                            console.print(description, end='\r')
+                            elapsed_time = time.time() - start_time
+                            speed = keys_generated / elapsed_time if elapsed_time > 0 else 0
+                            formatted_speed = convert_int(speed)
+                            speed1 = total_keys_scanned / elapsed_time if elapsed_time > 0 else 0
+                            formatted_speed1 = convert_int(speed1)
+                            description = f"{formatted_speed} Total Keys/Sec from {num_cpus}  CPU = {formatted_speed1} Total Keys: {total_keys_scanned1}"
+                            print(red(description), end="")
                             keys_generated = 0
+                            total_keys_scanned = 0
                             start_time = time.time()
                     P = Pv[-65:]
                     current_pvk += group_size
@@ -135,17 +220,23 @@ def generate_keys(cpu_start, cpu_end, order, choice_start, end_hex, num_cpus):
                             process_address(this_btc, current_pvk+t, choice_start)
                             keys_generated += 1
                             total_keys_scanned += keys_generated*num_cpus
+                            total_keys_scanned1 += keys_generated*num_cpus
                             if time.time() - start_time >= 1 and multiprocessing.current_process()._identity[0] == 1:
-                                keys_per_second = keys_generated / (time.time() - start_time)
-                                total_CPU_key = keys_per_second * num_cpus
-                                description = f"[bold green]Keys/Sec per CPU: [/bold green]{round(keys_per_second)} [bold green]Total Keys/Sec from[/bold green] {num_cpus} [bold green]CPU = [/bold green]{round(total_CPU_key)} [bold green]Total Keys: [/bold green]{total_keys_scanned}"
-                                console.print(description, end='\r')
+                                elapsed_time = time.time() - start_time
+                                speed = keys_generated / elapsed_time if elapsed_time > 0 else 0
+                                formatted_speed = convert_int(speed)
+                                speed1 = total_keys_scanned / elapsed_time if elapsed_time > 0 else 0
+                                formatted_speed1 = convert_int(speed1)
+                                description = f"{formatted_speed} Total Keys/Sec from {num_cpus}  CPU = {formatted_speed1} Total Keys: {total_keys_scanned1}"
+                                print(red(description), end="")
                                 keys_generated = 0
+                                total_keys_scanned = 0
                                 start_time = time.time()
+
                         P = Pv[-65:]
                         current_pvk += group_size
     except KeyboardInterrupt:
-        console.print("[bold red]Program interrupted. Cleaning up...[/bold red]")
+        print(purple("Program interrupted. Cleaning up...")+ "\033[38;2;148;0;230m")
         if order == '1' and multiprocessing.current_process()._identity[0] == 1 and order == '1':
             save_progress('progress.txt', current_pvk+t, end_hex)
         return False
@@ -165,28 +256,24 @@ def load_progress(filename):
         return None, None
 
 if __name__ == '__main__':
-    mizogg= '''[red]
-                      ___            ___  
-                     (o o)          (o o) 
+    mizogg= f'''
+                      ___            ___
+                     (o o)          (o o)
                     (  V  ) MIZOGG (  V  )
                     --m-m------------m-m--
                   © mizogg.co.uk 2018 - 2023
-                    MizICE.py CryptoHunter
-[/red]'''
-    console.print(mizogg)
+                   MizICE.py CryptoHunter
+
+                     VIP PROJECT Mizogg
+                 
+                {red(f"[>] Running with Python {sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}")}
+
+
+'''
+    print(water(mizogg), end="")
     CPU_AMOUNT = multiprocessing.cpu_count()
     num_cpus = int(Prompt.ask(f'[bold yellow]You have [/bold yellow]{CPU_AMOUNT}[bold yellow] CPUs. How many would you like to use? [/bold yellow](1-{CPU_AMOUNT})'))
-    choice_start = Prompt.ask('[bold yellow]Do you want to run the scan[/bold yellow][bold green] Offline [/bold green]or [bold red]Online?[/bold red][bold yellow] ([/bold yellow][bold green]1 - Offline[/bold green] [bold red]2 - Online[/bold red][bold yellow]) [/bold yellow]')
-    if choice_start == '1':
-        console.print('[bold green] Starting Offline Scan[/bold green]')
-        addfind = set(addfind)
-    elif choice_start == '2':
-        console.print('[bold red]Starting Online Scan[/bold red]')
-    else:
-        choice_start = '1'
-        print('Invalid option selected. Using Offline Scan.')
-        console.print('[bold green] Starting Offline Scan[/bold green]')
-        addfind = set(addfind)
+    choice_start = Prompt.ask('[bold yellow]Do you want to run the scan[/bold yellow] Offline or Online?[bold yellow] ([/bold yellow]1 - Offline 2 - Online[bold yellow]) [/bold yellow]')
 
     start_hex, end_hex = load_progress('progress.txt')
     if start_hex and end_hex:
