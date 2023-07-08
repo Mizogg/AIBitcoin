@@ -1,0 +1,6 @@
+﻿json
+requests
+rich
+simplebloomfilter
+bitarray==1.9.2
+PyQt5
