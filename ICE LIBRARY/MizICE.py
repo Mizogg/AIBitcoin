@@ -30,6 +30,19 @@ def red(text):
         faded += "\n"
     return faded
 
+
+def win_colour(text):
+    os.system(""); faded = ""
+    for line in text.splitlines():
+        green = 20
+        for character in line:
+            green += 3
+            if green < 0:
+                green = 0
+            faded += (f"\033[38;2;255;{green};0m{character}\033[0m")
+        faded += "\n"
+    return faded
+    
 def blue(text):
     os.system(""); faded = ""
     for line in text.splitlines():
@@ -108,7 +121,7 @@ def convert_int(num: int):
 def process_address(address, private_key, choice_start):
     if choice_start == '1':
         if address in addfind:
-            print(purple(f'\nFOUND!! Private Key: {hex(private_key)}\tAddress: {address}\n') + "\033[38;2;148;0;230m")
+            print(win_colour(f'\nFOUND!! Private Key: {hex(private_key)}\tAddress: {address}\n') + "")
             with open('found.txt', 'a') as result:
                 result.write(f'Private Key: {hex(private_key)}\tAddress: {address}\n')
     elif choice_start == '2':
